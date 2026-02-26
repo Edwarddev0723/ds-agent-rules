@@ -1,0 +1,3 @@
+# Preset: ts-forecast
+# Base overlay + snippets for time series forecasting projects
+ds-ml time-series mlops

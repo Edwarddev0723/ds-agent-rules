@@ -1,0 +1,3 @@
+# Preset: agentic-ai
+# Base overlay + snippets for building AI agent systems
+llm-eng agentic-ai prompt-engineering rag mlops responsible-ai

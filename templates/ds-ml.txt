@@ -1,0 +1,34 @@
+# Template: DS/ML Project Structure
+# Used by new-project.sh --scaffold to create directory structure
+
+## Directories to create:
+# src/             ← production Python modules
+# src/data/        ← data loading and preprocessing
+# src/features/    ← feature engineering
+# src/models/      ← model definitions
+# src/evaluation/  ← evaluation scripts
+# tests/           ← mirrors src/ structure
+# configs/         ← YAML config files
+# scripts/         ← one-off utility scripts
+# notebooks/       ← exploration only
+# data/raw/        ← immutable source data
+# data/processed/  ← cleaned & transformed
+# data/features/   ← feature store output
+# docs/            ← documentation
+# models/          ← saved model checkpoints
+
+dirs:
+  - src
+  - src/data
+  - src/features
+  - src/models
+  - src/evaluation
+  - tests
+  - configs
+  - scripts
+  - notebooks
+  - data/raw
+  - data/processed
+  - data/features
+  - docs
+  - models

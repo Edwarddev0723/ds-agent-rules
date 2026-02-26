@@ -1,0 +1,16 @@
+# Template: Software Engineering Project Structure
+# Used by new-project.sh --scaffold to create directory structure
+
+dirs:
+  - src
+  - src/api
+  - src/core
+  - src/utils
+  - src/models
+  - tests
+  - tests/unit
+  - tests/integration
+  - configs
+  - scripts
+  - docs
+  - migrations

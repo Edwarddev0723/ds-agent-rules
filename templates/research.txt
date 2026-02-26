@@ -1,0 +1,18 @@
+# Template: Research Project Structure
+# Used by new-project.sh --scaffold to create directory structure
+
+dirs:
+  - src
+  - src/models
+  - src/data
+  - src/evaluation
+  - tests
+  - configs
+  - scripts
+  - notebooks
+  - data/raw
+  - data/processed
+  - docs
+  - experiments
+  - figures
+  - paper

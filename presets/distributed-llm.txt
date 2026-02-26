@@ -1,0 +1,3 @@
+# Preset: distributed-llm
+# Fine-tuning large language models with distributed training
+ds-ml llm-finetuning distributed-training pytorch mlops

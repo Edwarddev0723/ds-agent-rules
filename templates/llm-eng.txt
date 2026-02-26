@@ -1,0 +1,20 @@
+# Template: LLM Engineering Project Structure
+# Used by new-project.sh --scaffold to create directory structure
+
+dirs:
+  - src
+  - src/prompts
+  - src/chains
+  - src/retrieval
+  - src/evaluation
+  - src/serving
+  - tests
+  - configs
+  - scripts
+  - notebooks
+  - data/raw
+  - data/processed
+  - data/eval_sets
+  - docs
+  - models
+  - prompts

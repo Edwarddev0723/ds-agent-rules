@@ -1,0 +1,3 @@
+# Preset: tabular-project
+# Base overlay + snippets for traditional ML on structured/tabular data
+ds-ml tabular-ml mlops
