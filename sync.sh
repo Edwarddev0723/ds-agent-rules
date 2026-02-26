@@ -111,8 +111,26 @@ if [[ -z "$PRESET" && "$HAS_POSITIONAL_ARGS" == false && -f "$CONFIG_FILE" ]]; t
   echo "📄 Auto-detected .ai-rules.yaml"
 
   # ─── YAML parser: prefer yq if available, fallback to grep+sed ───────────
+  _yq_flavor=""
   if command -v yq &>/dev/null; then
-    # Robust parser via yq (supports comments, quotes, anchors)
+    # Detect yq flavor: Mike Farah's Go yq vs kislyuk's Python yq (jq wrapper)
+    if yq --version 2>&1 | grep -qi "mikefarah\|https://github.com/mikefarah"; then
+      _yq_flavor="go"
+    elif yq --version 2>&1 | grep -qE '^yq [0-9]'; then
+      _yq_flavor="python"
+    fi
+  fi
+
+  if [[ "$_yq_flavor" == "go" ]]; then
+    # Mike Farah's Go yq (pre-installed on GitHub Actions ubuntu runners)
+    _yaml_val() {
+      yq ".${1} // \"\"" "$CONFIG_FILE" 2>/dev/null || true
+    }
+    _yaml_list() {
+      yq ".${1}[]" "$CONFIG_FILE" 2>/dev/null | xargs || true
+    }
+  elif [[ "$_yq_flavor" == "python" ]]; then
+    # kislyuk/yq — Python jq wrapper
     _yaml_val() {
       yq -r ".${1} // \"\"" "$CONFIG_FILE" 2>/dev/null || true
     }
