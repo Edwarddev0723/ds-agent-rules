@@ -1,0 +1,2 @@
+# JAX-based ML research project
+research jax distributed-training evaluation-framework

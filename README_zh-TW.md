@@ -1,10 +1,15 @@
 # ds-agent-rules
 
+[![CI](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml/badge.svg)](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/Edwarddev0723/ds-agent-rules)](https://github.com/Edwarddev0723/ds-agent-rules/releases)
+[![GitHub stars](https://img.shields.io/github/stars/Edwarddev0723/ds-agent-rules?style=social)](https://github.com/Edwarddev0723/ds-agent-rules/stargazers)
+
 > **[English README](README.md)**
 
 一套可攜式、可組合的 AI 程式碼代理規則系統 — 為**資料科學、機器學習與 AI 工程**專案提供單一規則來源。
 
-撰寫一次規則，同步至 **Claude Code · GitHub Copilot · OpenAI Codex · Gemini Code** — 一次搞定。
+撰寫一次規則，同步至 **Claude Code · GitHub Copilot · OpenAI Codex · Gemini Code · Cursor · Windsurf** — 一次搞定。
 
 ---
 
@@ -39,6 +44,8 @@
  │  AGENTS.md                        │
  │  .github/copilot-instructions.md  │
  │  .gemini/styleguide.md            │
+ │  .cursorrules                     │
+ │  .windsurfrules                   │
  └────────────────────────────────────┘
 ```
 
@@ -51,7 +58,7 @@
 ### 1. 下載
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ds-agent-rules ~/.ai-rules
+git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 cd ~/.ai-rules && chmod +x sync.sh new-project.sh
 ```
 
@@ -93,9 +100,20 @@ vim .ai-rules.yaml                   # 依專案需求編輯
 ```bash
 ./sync.sh --list                     # 列出所有疊加層、片段、預設組合
 ./sync.sh --dry-run ds-ml rag        # 預覽，不寫入檔案
+./sync.sh --diff                     # 顯示 unified diff 開始套用前的變更
 ./sync.sh --validate                 # 檢查專案結構是否符合規則
 ./sync.sh --output-dir /other/proj   # 寫入至其他專案
 ./sync.sh --team ./team-rules        # 載入團隊專屬規則
+```
+
+### 4. Make 指令
+
+```bash
+make help                            # 顯示所有可用的 target
+make lint                            # 執行 ShellCheck 檢查所有腳本
+make test                            # 執行 bats 測試套件
+make validate                        # 驗證目前專案
+make ci                              # lint + test（與 CI 相同）
 ```
 
 ---
@@ -137,10 +155,19 @@ ds-agent-rules/
 │   ├── time-series.md       # 時間序列預測
 │   └── vlm.md               # 視覺語言模型
 │
-├── presets/                  # 具名預設組合（一鍵設定）
-├── templates/                # 各專案類型的目錄鷹架
+├── presets/                  # 具名預設組合（一鍵設定，15 組預設）
+├── templates/                # 各專案類型的目錄鷹架（5 個模板）
+├── tests/                    # bats 測試套件
+│   └── sync.bats
+├── .github/
+│   ├── workflows/ci.yml      # CI（ShellCheck + bats，ubuntu & macos）
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/       # Issue 模板（新增 snippet、Bug 回報）
 ├── sync.sh                   # 主要同步腳本
 ├── new-project.sh            # 互動式專案初始化器
+├── Makefile                  # make lint / test / validate / ci
+├── CONTRIBUTING.md           # 貢獻指南與 snippet 格式規範
+├── CHANGELOG.md              # 版本變更紀錄
 └── README.md
 ```
 
@@ -163,6 +190,10 @@ ds-agent-rules/
 | `research-llm` | research | llm-finetuning, rag, responsible-ai |
 | `full-stack-ai` | llm-eng | llm-finetuning, rag, mlops, responsible-ai |
 | `data-platform` | data-eng | streaming-ml, mlops |
+| `graph-ml-project` | ds-ml | graph-ml, evaluation-framework, mlops |
+| `labeling-project` | ds-ml | data-labeling, evaluation-framework, responsible-ai |
+| `edge-deploy` | ds-ml | edge-inference, pytorch, mlops |
+| `vlm-project` | ds-ml | vlm, cv, llm-finetuning, evaluation-framework |
 
 ---
 
@@ -215,10 +246,10 @@ mkdir team-rules && vim team-rules/our-standards.md
 
 ```bash
 # 方式一：獨立 clone
-git clone https://github.com/YOUR_USERNAME/ds-agent-rules ~/.ai-rules
+git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 
 # 方式二：作為 dotfiles 的 Git submodule
-cd ~/.dotfiles && git submodule add https://github.com/YOUR_USERNAME/ds-agent-rules
+cd ~/.dotfiles && git submodule add https://github.com/Edwarddev0723/ds-agent-rules
 ```
 
 ### 要把產生的檔案 commit 嗎？
@@ -263,6 +294,24 @@ cd ~/.ai-rules && git add -A && git commit -m "rule: ..."
 | GitHub Copilot | `.github/copilot-instructions.md` |
 | OpenAI Codex / ChatGPT | `AGENTS.md` |
 | Google Gemini Code | `.gemini/styleguide.md` |
+| Cursor | `.cursorrules` |
+| Windsurf | `.windsurfrules` |
+
+---
+
+## 貢獻指南
+
+歡迎貢獻！請參考 [CONTRIBUTING.md](CONTRIBUTING.md) 了解：
+- Snippet 格式規範與品質標準
+- Preset 與 overlay 格式
+- Commit 慣例
+- PR 檢查清單
+
+---
+
+## 版本變更紀錄
+
+請參考 [CHANGELOG.md](CHANGELOG.md) 查看版本歷史。
 
 ---
 

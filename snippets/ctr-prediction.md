@@ -24,3 +24,11 @@ Data is large-scale, sparse, and highly temporal — treat accordingly.
 ## Scale Considerations
 - Assume dataset doesn't fit in RAM — use chunked processing or Spark
 - Feature store lookups must be batched — never row-by-row in production
+- Embedding tables dominate model size — monitor and cap embedding dimensions (start with dim=16)
+
+## Common Pitfalls
+- Using future impressions/clicks in training features — temporal leakage is the #1 silent killer
+- Ignoring position bias: items shown in position 1 always get more clicks regardless of relevance
+- Evaluating on uniformly random traffic but deploying on biased traffic — offline/online gap is inevitable
+- One-hot encoding high-cardinality features (>10K categories) — use hashing or embeddings instead
+- Not monitoring prediction distribution shift after deployment — models degrade within days as user behavior changes

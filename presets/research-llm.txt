@@ -1,3 +1,3 @@
 # Preset: research-llm
 # Base overlay + snippets for academic LLM research
-research llm-finetuning rag responsible-ai
+research llm-finetuning rag synthetic-data responsible-ai

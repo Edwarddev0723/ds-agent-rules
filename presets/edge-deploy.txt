@@ -1,0 +1,2 @@
+# Edge / mobile deployment project
+ds-ml edge-inference pytorch mlops

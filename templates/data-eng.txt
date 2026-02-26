@@ -1,0 +1,16 @@
+# Directory scaffold for Data Engineering projects
+dirs:
+  - src/pipelines
+  - src/connectors
+  - src/transforms
+  - src/schemas
+  - src/quality
+  - tests/unit
+  - tests/integration
+  - configs
+  - data/raw
+  - data/processed
+  - data/staging
+  - scripts
+  - docs
+  - monitoring

@@ -1,10 +1,15 @@
 # ds-agent-rules
 
+[![CI](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml/badge.svg)](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/Edwarddev0723/ds-agent-rules)](https://github.com/Edwarddev0723/ds-agent-rules/releases)
+[![GitHub stars](https://img.shields.io/github/stars/Edwarddev0723/ds-agent-rules?style=social)](https://github.com/Edwarddev0723/ds-agent-rules/stargazers)
+
 > **[繁體中文版 README](README_zh-TW.md)**
 
 A portable, composable rules system for AI coding agents — one source of truth for **Data Science, Machine Learning, and AI Engineering** projects.
 
-Write rules once. Sync to **Claude Code · GitHub Copilot · OpenAI Codex · Gemini Code** — all at once.
+Write rules once. Sync to **Claude Code · GitHub Copilot · OpenAI Codex · Gemini Code · Cursor · Windsurf** — all at once.
 
 ---
 
@@ -39,6 +44,8 @@ Without explicit rules, AI agents silently introduce bad habits:
  │  AGENTS.md                        │
  │  .github/copilot-instructions.md  │
  │  .gemini/styleguide.md            │
+ │  .cursorrules                     │
+ │  .windsurfrules                   │
  └────────────────────────────────────┘
 ```
 
@@ -51,7 +58,7 @@ Without explicit rules, AI agents silently introduce bad habits:
 ### 1. Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ds-agent-rules ~/.ai-rules
+git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 cd ~/.ai-rules && chmod +x sync.sh new-project.sh
 ```
 
@@ -93,9 +100,20 @@ vim .ai-rules.yaml                   # edit to match your project
 ```bash
 ./sync.sh --list                     # show all overlays, snippets, presets
 ./sync.sh --dry-run ds-ml rag        # preview without writing files
+./sync.sh --diff                     # show unified diff before applying changes
 ./sync.sh --validate                 # check project structure against rules
 ./sync.sh --output-dir /other/proj   # write to a different project
 ./sync.sh --team ./team-rules        # include team-specific rules
+```
+
+### 4. Make targets
+
+```bash
+make help                            # show all available targets
+make lint                            # run ShellCheck on all scripts
+make test                            # run bats test suite
+make validate                        # validate current project
+make ci                              # lint + test (same as CI)
 ```
 
 ---
@@ -137,10 +155,19 @@ ds-agent-rules/
 │   ├── time-series.md       # Time Series Forecasting
 │   └── vlm.md               # Vision-Language Models
 │
-├── presets/                  # Named combos for one-command setup
-├── templates/                # Directory scaffolds per project type
+├── presets/                  # Named combos for one-command setup (15 presets)
+├── templates/                # Directory scaffolds per project type (5 templates)
+├── tests/                    # bats test suite
+│   └── sync.bats
+├── .github/
+│   ├── workflows/ci.yml      # CI (ShellCheck + bats on ubuntu & macos)
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/       # Issue templates (new snippet, bug report)
 ├── sync.sh                   # Main sync script
 ├── new-project.sh            # Interactive project initializer
+├── Makefile                  # make lint / test / validate / ci
+├── CONTRIBUTING.md           # Contributor guide & snippet format spec
+├── CHANGELOG.md              # Release history
 └── README.md
 ```
 
@@ -163,6 +190,10 @@ ds-agent-rules/
 | `research-llm` | research | llm-finetuning, rag, responsible-ai |
 | `full-stack-ai` | llm-eng | llm-finetuning, rag, mlops, responsible-ai |
 | `data-platform` | data-eng | streaming-ml, mlops |
+| `graph-ml-project` | ds-ml | graph-ml, evaluation-framework, mlops |
+| `labeling-project` | ds-ml | data-labeling, evaluation-framework, responsible-ai |
+| `edge-deploy` | ds-ml | edge-inference, pytorch, mlops |
+| `vlm-project` | ds-ml | vlm, cv, llm-finetuning, evaluation-framework |
 
 ---
 
@@ -215,10 +246,10 @@ mkdir team-rules && vim team-rules/our-standards.md
 
 ```bash
 # Option 1: Standalone
-git clone https://github.com/YOUR_USERNAME/ds-agent-rules ~/.ai-rules
+git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 
 # Option 2: Git submodule in dotfiles
-cd ~/.dotfiles && git submodule add https://github.com/YOUR_USERNAME/ds-agent-rules
+cd ~/.dotfiles && git submodule add https://github.com/Edwarddev0723/ds-agent-rules
 ```
 
 ### Committing generated files?
@@ -263,6 +294,33 @@ cd ~/.ai-rules && git add -A && git commit -m "rule: ..."
 | GitHub Copilot | `.github/copilot-instructions.md` |
 | OpenAI Codex / ChatGPT | `AGENTS.md` |
 | Google Gemini Code | `.gemini/styleguide.md` |
+| Cursor | `.cursorrules` |
+| Windsurf | `.windsurfrules` |
+
+---
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Snippet format specification & quality criteria
+- Preset & overlay format
+- Commit conventions
+- PR checklist
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+---
+
+## Who Uses This
+
+Using **ds-agent-rules** in your project or team? We'd love to hear about it! Open an issue or PR to add your name here.
+
+<!-- Add your project/team below -->
+<!-- - [Your Project](https://github.com/...) — short description -->
 
 ---
 

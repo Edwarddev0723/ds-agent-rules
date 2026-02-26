@@ -1,6 +1,7 @@
 #!/bin/bash
+set -euo pipefail
 # =============================================================================
-# ai-rules sync.sh
+# ai-rules sync.sh  v1.0.0
 # Combines base rules + project overlay + snippets into all AI tool formats
 #
 # Usage:
@@ -14,6 +15,7 @@
 #   ./sync.sh --validate                   # check project structure against rules
 #   ./sync.sh --init                       # create .ai-rules.yaml in current dir
 #   ./sync.sh --team ./team-rules          # include team-specific rules
+#   ./sync.sh --diff                       # show changes before writing
 # =============================================================================
 
 RULES_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -23,11 +25,15 @@ PRESET=""
 VALIDATE=false
 INIT_CONFIG=false
 TEAM_DIR=""
+DIFF_MODE=false
+PROJECT_TYPE=""
+SNIPPETS=()
 
 # ─── Parse flags ──────────────────────────────────────────────────────────────
 while [[ "${1:-}" == --* ]]; do
   case "$1" in
     --dry-run)    DRY_RUN=true; shift ;;
+    --diff)       DIFF_MODE=true; shift ;;
     --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
     --preset)     PRESET="$2"; shift 2 ;;
     --team)       TEAM_DIR="$2"; shift 2 ;;
@@ -59,7 +65,7 @@ while [[ "${1:-}" == --* ]]; do
       ;;
     *)
       echo "❌ Unknown flag: $1"
-      echo "   Flags: --dry-run, --preset, --output-dir, --team, --validate, --init, --list"
+      echo "   Flags: --dry-run, --diff, --preset, --output-dir, --team, --validate, --init, --list"
       exit 1
       ;;
   esac
@@ -104,13 +110,38 @@ HAS_POSITIONAL_ARGS=false
 if [[ -z "$PRESET" && "$HAS_POSITIONAL_ARGS" == false && -f "$CONFIG_FILE" ]]; then
   echo "📄 Auto-detected .ai-rules.yaml"
 
-  # Lightweight YAML parser (no external dependencies)
-  _yaml_val() {
-    grep "^${1}:" "$CONFIG_FILE" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//" | xargs
-  }
-  _yaml_list() {
-    awk "/^${1}:/,/^[a-zA-Z]/" "$CONFIG_FILE" | grep '^\s*-' | sed 's/^\s*-\s*//' | xargs
-  }
+  # ─── YAML parser: prefer yq if available, fallback to grep+sed ───────────
+  if command -v yq &>/dev/null; then
+    # Robust parser via yq (supports comments, quotes, anchors)
+    _yaml_val() {
+      yq -r ".${1} // \"\"" "$CONFIG_FILE" 2>/dev/null || true
+    }
+    _yaml_list() {
+      yq -r ".${1}[]? // empty" "$CONFIG_FILE" 2>/dev/null | xargs || true
+    }
+  else
+    # Lightweight YAML parser (no external dependencies)
+    # Handles: inline comments (# ...), single/double quotes, trailing whitespace
+    _yaml_val() {
+      grep "^${1}:" "$CONFIG_FILE" 2>/dev/null \
+        | head -1 \
+        | sed "s/^${1}:[[:space:]]*//" \
+        | sed 's/[[:space:]]*#.*$//' \
+        | sed "s/^['\"]//; s/['\"]$//" \
+        | xargs || true
+    }
+    _yaml_list() {
+      awk "
+        /^${1}:/ { found=1; next }
+        found && /^[a-zA-Z]/ { exit }
+        found && /^[[:space:]]*-/ { print }
+      " "$CONFIG_FILE" \
+        | sed 's/^[[:space:]]*-[[:space:]]*//' \
+        | sed 's/[[:space:]]*#.*$//' \
+        | sed "s/^['\"]//; s/['\"]$//" \
+        | xargs || true
+    }
+  fi
 
   CFG_PRESET=$(_yaml_val "preset")
   CFG_PROFILE=$(_yaml_val "profile")
@@ -147,9 +178,9 @@ if [[ -n "$PRESET" ]]; then
   PROJECT_TYPE="${PRESET_PARTS[0]}"
   SNIPPETS=("${PRESET_PARTS[@]:1}")
   echo "📦 Using preset: $PRESET → $PROJECT_TYPE ${SNIPPETS[*]}"
-elif [[ -z "${PROJECT_TYPE+x}" ]]; then
+elif [[ -z "${PROJECT_TYPE:-}" && ${#SNIPPETS[@]} -eq 0 ]]; then
   PROJECT_TYPE=${1:-""}
-  shift 2>/dev/null
+  shift 2>/dev/null || true
   SNIPPETS=("$@")
 fi
 
@@ -165,13 +196,15 @@ if [[ ! -d "$OUTPUT_DIR" ]]; then
   exit 1
 fi
 
-for snippet in "${SNIPPETS[@]}"; do
-  if [[ ! -f "$RULES_DIR/snippets/$snippet.md" ]]; then
-    echo "❌ Unknown snippet: $snippet"
-    echo "   Run './sync.sh --list' to see available options"
-    exit 1
-  fi
-done
+if [[ ${#SNIPPETS[@]} -gt 0 ]]; then
+  for snippet in "${SNIPPETS[@]}"; do
+    if [[ ! -f "$RULES_DIR/snippets/$snippet.md" ]]; then
+      echo "❌ Unknown snippet: $snippet"
+      echo "   Run './sync.sh --list' to see available options"
+      exit 1
+    fi
+  done
+fi
 
 if [[ -n "$TEAM_DIR" && ! -d "$TEAM_DIR" ]]; then
   echo "⚠️  Team directory not found: $TEAM_DIR (skipping team rules)"
@@ -191,10 +224,12 @@ if [[ -n "$PROJECT_TYPE" ]]; then
 fi
 
 # Add snippets
-for snippet in "${SNIPPETS[@]}"; do
-  COMBINED+=$'\n\n---\n\n'
-  COMBINED+=$(cat "$RULES_DIR/snippets/$snippet.md")
-done
+if [[ ${#SNIPPETS[@]} -gt 0 ]]; then
+  for snippet in "${SNIPPETS[@]}"; do
+    COMBINED+=$'\n\n---\n\n'
+    COMBINED+=$(cat "$RULES_DIR/snippets/$snippet.md")
+  done
+fi
 
 # Add team rules (all .md files in team directory)
 if [[ -n "$TEAM_DIR" && -d "$TEAM_DIR" ]]; then
@@ -230,55 +265,55 @@ if [[ "$VALIDATE" == true ]]; then
   # Check: src/ directory exists
   if [[ ! -d "$OUTPUT_DIR/src" ]]; then
     echo "   ⚠️  Missing src/ directory"
-    ((ISSUES++))
+    ISSUES=$((ISSUES + 1))
   fi
 
   # Check: tests/ directory exists
   if [[ ! -d "$OUTPUT_DIR/tests" ]]; then
     echo "   ⚠️  Missing tests/ directory"
-    ((ISSUES++))
+    ISSUES=$((ISSUES + 1))
   fi
 
   # Check: configs/ directory exists
   if [[ ! -d "$OUTPUT_DIR/configs" ]]; then
     echo "   ⚠️  Missing configs/ directory"
-    ((ISSUES++))
+    ISSUES=$((ISSUES + 1))
   fi
 
   # Check: no hardcoded secrets patterns
   if [[ -d "$OUTPUT_DIR/src" ]]; then
-    SECRET_HITS=$(grep -rn 'sk-[a-zA-Z0-9]\{20,\}\|AKIA[A-Z0-9]\{16\}\|ghp_[a-zA-Z0-9]\{36\}' "$OUTPUT_DIR/src" "$OUTPUT_DIR/configs" 2>/dev/null | head -5)
+    SECRET_HITS=$(grep -rn 'sk-[a-zA-Z0-9]\{20,\}\|AKIA[A-Z0-9]\{16\}\|ghp_[a-zA-Z0-9]\{36\}' "$OUTPUT_DIR/src" "$OUTPUT_DIR/configs" 2>/dev/null | head -5 || true)
     if [[ -n "$SECRET_HITS" ]]; then
       echo "   🚨 Potential hardcoded secrets detected:"
       echo "$SECRET_HITS"
-      ((ISSUES++))
+      ISSUES=$((ISSUES + 1))
     fi
   fi
 
   # Check: no print() in Python files (should use logging)
   if [[ -d "$OUTPUT_DIR/src" ]]; then
-    PRINT_COUNT=$(grep -rn '^\s*print(' "$OUTPUT_DIR/src" 2>/dev/null | wc -l | xargs)
+    PRINT_COUNT=$(grep -rn '^\s*print(' "$OUTPUT_DIR/src" 2>/dev/null | wc -l | xargs || echo 0)
     if [[ "$PRINT_COUNT" -gt 0 ]]; then
       echo "   ⚠️  Found $PRINT_COUNT print() calls in src/ — use logging module instead"
-      ((ISSUES++))
+      ISSUES=$((ISSUES + 1))
     fi
   fi
 
   # Check: no bare except
   if [[ -d "$OUTPUT_DIR/src" ]]; then
-    BARE_EXCEPT=$(grep -rn '^\s*except:\s*$' "$OUTPUT_DIR/src" 2>/dev/null | wc -l | xargs)
+    BARE_EXCEPT=$(grep -rn '^\s*except:\s*$' "$OUTPUT_DIR/src" 2>/dev/null | wc -l | xargs || echo 0)
     if [[ "$BARE_EXCEPT" -gt 0 ]]; then
       echo "   ⚠️  Found $BARE_EXCEPT bare except: clauses — catch specific exceptions"
-      ((ISSUES++))
+      ISSUES=$((ISSUES + 1))
     fi
   fi
 
   # Check: type hints in Python function signatures
   if [[ -d "$OUTPUT_DIR/src" ]]; then
-    NO_HINTS=$(grep -rn 'def [a-z].*)\s*:' "$OUTPUT_DIR/src" 2>/dev/null | grep -v '\->' | wc -l | xargs)
+    NO_HINTS=$(grep -rn 'def [a-z].*)\s*:' "$OUTPUT_DIR/src" 2>/dev/null | grep -vc '\->' || echo 0)
     if [[ "$NO_HINTS" -gt 5 ]]; then
       echo "   ⚠️  Found $NO_HINTS functions without return type hints in src/"
-      ((ISSUES++))
+      ISSUES=$((ISSUES + 1))
     fi
   fi
 
@@ -286,11 +321,11 @@ if [[ "$VALIDATE" == true ]]; then
   if [[ "$PROJECT_TYPE" == "ds-ml" || "$PROJECT_TYPE" == "llm-eng" ]]; then
     if [[ ! -d "$OUTPUT_DIR/data" ]]; then
       echo "   ⚠️  Missing data/ directory (expected for $PROJECT_TYPE projects)"
-      ((ISSUES++))
+      ISSUES=$((ISSUES + 1))
     fi
     if [[ ! -d "$OUTPUT_DIR/notebooks" && ! -d "$OUTPUT_DIR/experiments" ]]; then
       echo "   ⚠️  Missing notebooks/ or experiments/ directory"
-      ((ISSUES++))
+      ISSUES=$((ISSUES + 1))
     fi
   fi
 
@@ -315,7 +350,45 @@ if [[ "$DRY_RUN" == true ]]; then
   echo "   AGENTS.md"
   echo "   .github/copilot-instructions.md"
   echo "   .gemini/styleguide.md"
+  echo "   .cursorrules"
+  echo "   .windsurfrules"
   exit 0
+fi
+
+# ─── Diff mode: show what would change ───────────────────────────────────────
+_show_diff() {
+  local target="$1"
+  if [[ -f "$target" ]]; then
+    local tmpfile
+    tmpfile=$(mktemp)
+    echo "$COMBINED" > "$tmpfile"
+    if ! diff -u "$target" "$tmpfile" 2>/dev/null; then
+      true  # diff found differences, already printed
+    else
+      echo "   (no changes) $target"
+    fi
+    rm -f "$tmpfile"
+  else
+    echo "   (new file) $target"
+  fi
+}
+
+if [[ "$DIFF_MODE" == true ]]; then
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🔍 DIFF — changes that will be applied:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  _show_diff "$OUTPUT_DIR/CLAUDE.md"
+  _show_diff "$OUTPUT_DIR/AGENTS.md"
+  _show_diff "$OUTPUT_DIR/.github/copilot-instructions.md"
+  _show_diff "$OUTPUT_DIR/.gemini/styleguide.md"
+  _show_diff "$OUTPUT_DIR/.cursorrules"
+  _show_diff "$OUTPUT_DIR/.windsurfrules"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  read -rp "Apply these changes? (y/N): " apply
+  if [[ ! "$apply" =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 0
+  fi
 fi
 
 # ─── Write to all tool locations ─────────────────────────────────────────────
@@ -327,6 +400,10 @@ echo "$COMBINED" > "$OUTPUT_DIR/.github/copilot-instructions.md"
 
 mkdir -p "$OUTPUT_DIR/.gemini"
 echo "$COMBINED" > "$OUTPUT_DIR/.gemini/styleguide.md"
+
+# Cursor / Windsurf support
+echo "$COMBINED" > "$OUTPUT_DIR/.cursorrules"
+echo "$COMBINED" > "$OUTPUT_DIR/.windsurfrules"
 
 # ─── Summary ─────────────────────────────────────────────────────────────────
 echo "✅ AI rules synced successfully"
@@ -348,5 +425,7 @@ echo "   → CLAUDE.md                           (Claude Code)"
 echo "   → AGENTS.md                           (OpenAI Codex / ChatGPT)"
 echo "   → .github/copilot-instructions.md     (GitHub Copilot)"
 echo "   → .gemini/styleguide.md               (Google Gemini Code)"
+echo "   → .cursorrules                        (Cursor)"
+echo "   → .windsurfrules                      (Windsurf)"
 echo ""
 echo "💡 Tip: run --validate to check your project against these rules"

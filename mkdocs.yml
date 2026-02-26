@@ -1,0 +1,92 @@
+site_name: ds-agent-rules
+site_url: https://edwarddev0723.github.io/ds-agent-rules/
+site_description: A portable, composable rules system for AI coding agents — Data Science, ML & AI Engineering.
+repo_url: https://github.com/Edwarddev0723/ds-agent-rules
+repo_name: Edwarddev0723/ds-agent-rules
+edit_uri: edit/main/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quickstart: getting-started/quickstart.md
+      - Configuration: getting-started/configuration.md
+  - Base Overlays:
+      - Core (always loaded): overlays/core.md
+      - Data Science / ML: overlays/ds-ml.md
+      - LLM Engineering: overlays/llm-eng.md
+      - Data Engineering: overlays/data-eng.md
+      - Software Engineering: overlays/software-eng.md
+      - Research: overlays/research.md
+  - Snippets:
+      - Overview: snippets/index.md
+      - Agentic AI: snippets/agentic-ai.md
+      - Audio & Speech: snippets/audio-speech.md
+      - Chinese NLP (TC): snippets/chinese-nlp.md
+      - CTR Prediction: snippets/ctr-prediction.md
+      - Computer Vision: snippets/cv.md
+      - Data Labeling: snippets/data-labeling.md
+      - Distributed Training: snippets/distributed-training.md
+      - Edge Inference: snippets/edge-inference.md
+      - Evaluation Framework: snippets/evaluation-framework.md
+      - Graph ML: snippets/graph-ml.md
+      - JAX: snippets/jax.md
+      - LLM Fine-Tuning: snippets/llm-finetuning.md
+      - MLOps: snippets/mlops.md
+      - NLP General: snippets/nlp-general.md
+      - Prompt Engineering: snippets/prompt-engineering.md
+      - PyTorch: snippets/pytorch.md
+      - RAG: snippets/rag.md
+      - Responsible AI: snippets/responsible-ai.md
+      - Streaming ML: snippets/streaming-ml.md
+      - Synthetic Data: snippets/synthetic-data.md
+      - Tabular ML: snippets/tabular-ml.md
+      - Time Series: snippets/time-series.md
+      - VLM: snippets/vlm.md
+  - Presets: presets.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
