@@ -1,7 +1,7 @@
 name: 'Sync AI Agent Rules'
 description: >
   Auto-sync ds-agent-rules into CLAUDE.md, .cursorrules, AGENTS.md, and other
-  AI tool configs whenever .ai-rules.yaml changes. 
+  AI tool configs whenever
 author: 'Edwarddev0723'
 
 branding:
