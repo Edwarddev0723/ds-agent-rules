@@ -264,6 +264,7 @@ mkdir team-rules && vim team-rules/our-standards.md
 | **新增片段** | 建立 `snippets/my-domain.md` → `./sync.sh ds-ml my-domain` |
 | **新增預設組合** | `echo "ds-ml my-domain mlops" > presets/my-preset.txt` |
 | **更新規則** | 編輯片段 → `./sync.sh` → `git commit` |
+| **外部片段** | 在 `.ai-rules.yaml` snippets 清單中加入 `github:owner/repo/snippets/foo.md` 或 `https://...` |
 
 ---
 

@@ -16,6 +16,30 @@ snippets:
 # preset: llm-project        # optional: use a preset instead
 ```
 
+## External Rule Dependencies
+
+You can pull snippets from any public GitHub repository or HTTPS URL, enabling a decentralized ecosystem of community-maintained rules:
+
+```yaml
+profile: ds-ml
+snippets:
+  - rag
+  - mlops
+  # Pull from any public GitHub repo (resolves to the main branch)
+  - github:someone/awesome-ai-rules/snippets/langchain.md
+  # Or a direct HTTPS URL
+  - https://example.com/team-security-rules.md
+```
+
+**`github:` shorthand** — format: `github:owner/repo/path/to/file.md`
+Resolves to `https://raw.githubusercontent.com/{owner}/{repo}/main/{path}`.
+
+**Requirements**: `curl` must be installed (pre-installed on macOS and most Linux distributions).
+
+**Caching**: External snippets are fetched once per `sync.sh` invocation into an ephemeral temp directory. They are not cached between runs.
+
+**Error handling**: If a fetch fails (network error, HTTP 4xx/5xx), `sync.sh` exits immediately with a clear error message.
+
 ## Team Rules
 
 Append company/team-specific `.md` rules after all snippets:

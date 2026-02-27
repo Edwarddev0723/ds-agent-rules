@@ -353,6 +353,7 @@ mkdir team-rules && vim team-rules/our-standards.md
 | **New snippet** | Create `snippets/my-domain.md` → `./sync.sh ds-ml my-domain` |
 | **New preset** | `echo "ds-ml my-domain mlops" > presets/my-preset.txt` |
 | **Update a rule** | Edit snippet → `./sync.sh` → `git commit` |
+| **External snippet** | Add `github:owner/repo/snippets/foo.md` or `https://...` to `.ai-rules.yaml` snippets list |
 
 ---
 

@@ -183,6 +183,65 @@ if [[ -z "$PRESET" && "$HAS_POSITIONAL_ARGS" == false && -f "$CONFIG_FILE" ]]; t
   fi
 fi
 
+# ─── External snippet helpers ─────────────────────────────────────────────────
+_is_external_ref() {
+  [[ "$1" == github:* || "$1" == https://* || "$1" == http://* ]]
+}
+
+_EXT_CACHE_DIR=""
+_FETCH_RESULT=""
+
+# Fetches an external snippet into _EXT_CACHE_DIR and sets _FETCH_RESULT to the
+# local file path.  Must be called in the main process (not a subshell) so that
+# the cache dir lifecycle and _FETCH_RESULT are visible to the caller.
+# Set RULES_CURL env var to override the curl executable (useful in tests).
+_fetch_external_snippet() {
+  local ref="$1"
+  local url=""
+  _FETCH_RESULT=""
+
+  if [[ "$ref" == github:* ]]; then
+    local rest="${ref#github:}"
+    local owner="${rest%%/*}"; rest="${rest#*/}"
+    local repo="${rest%%/*}"; local path="${rest#*/}"
+    url="https://raw.githubusercontent.com/${owner}/${repo}/main/${path}"
+  else
+    url="$ref"
+  fi
+
+  local curl_cmd="${RULES_CURL:-curl}"
+  if ! command -v "$curl_cmd" &>/dev/null; then
+    echo "❌ curl is required for external snippets but was not found" >&2
+    return 1
+  fi
+
+  if [[ -z "$_EXT_CACHE_DIR" ]]; then
+    _EXT_CACHE_DIR=$(mktemp -d)
+    # shellcheck disable=SC2064
+    trap "rm -rf '${_EXT_CACHE_DIR}'" EXIT
+  fi
+
+  local fname
+  fname=$(printf '%s' "$ref" | tr -c 'a-zA-Z0-9._-' '_').md
+  local dest="${_EXT_CACHE_DIR}/${fname}"
+
+  local http_code
+  http_code=$("$curl_cmd" -sSL --max-time 30 -w "%{http_code}" -o "$dest" "$url")
+  local curl_exit=$?
+
+  if [[ $curl_exit -ne 0 ]]; then
+    echo "❌ Failed to fetch external snippet: $ref (curl error $curl_exit)" >&2
+    return 1
+  fi
+  if [[ "$http_code" != 2* ]]; then
+    echo "❌ Failed to fetch external snippet: $ref (HTTP $http_code)" >&2
+    rm -f "$dest"
+    return 1
+  fi
+
+  _FETCH_RESULT="$dest"
+}
+
 # ─── Resolve preset ──────────────────────────────────────────────────────────
 if [[ -n "$PRESET" ]]; then
   PRESET_FILE="$RULES_DIR/presets/$PRESET.txt"
@@ -214,13 +273,24 @@ if [[ ! -d "$OUTPUT_DIR" ]]; then
   exit 1
 fi
 
+declare -a SNIPPET_FILES=()
 if [[ ${#SNIPPETS[@]} -gt 0 ]]; then
   for snippet in "${SNIPPETS[@]}"; do
-    if [[ ! -f "$RULES_DIR/snippets/$snippet.md" ]]; then
-      echo "❌ Unknown snippet: $snippet"
-      echo "   Run './sync.sh --list' to see available options"
-      exit 1
+    if _is_external_ref "$snippet"; then
+      # Call directly (not via $()) so _FETCH_RESULT and _EXT_CACHE_DIR stay
+      # in the main process and the EXIT trap fires at the right time.
+      _fetch_external_snippet "$snippet" || exit 1
+      resolved="$_FETCH_RESULT"
+      echo "🌐 Fetched external snippet: $snippet"
+    else
+      resolved="$RULES_DIR/snippets/${snippet}.md"
+      if [[ ! -f "$resolved" ]]; then
+        echo "❌ Unknown snippet: $snippet"
+        echo "   Run './sync.sh --list' to see available options"
+        exit 1
+      fi
     fi
+    SNIPPET_FILES+=("$resolved")
   done
 fi
 
@@ -242,10 +312,10 @@ if [[ -n "$PROJECT_TYPE" ]]; then
 fi
 
 # Add snippets
-if [[ ${#SNIPPETS[@]} -gt 0 ]]; then
-  for snippet in "${SNIPPETS[@]}"; do
+if [[ ${#SNIPPET_FILES[@]} -gt 0 ]]; then
+  for f in "${SNIPPET_FILES[@]}"; do
     COMBINED+=$'\n\n---\n\n'
-    COMBINED+=$(cat "$RULES_DIR/snippets/$snippet.md")
+    COMBINED+=$(cat "$f")
   done
 fi
 

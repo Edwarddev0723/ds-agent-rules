@@ -388,3 +388,109 @@ EOF
     }
   done
 }
+
+# ─── External rule dependencies ───────────────────────────────────────────────
+
+# Helper: create a mock curl that writes a test snippet and returns HTTP 200
+_setup_mock_curl() {
+  local mockbin="$1"
+  mkdir -p "$mockbin"
+  cat > "$mockbin/curl" << 'MOCK'
+#!/bin/bash
+output_file=""
+i=1
+while [[ $i -le $# ]]; do
+  if [[ "${!i}" == "-o" ]]; then
+    i=$((i + 1))
+    output_file="${!i}"
+  fi
+  i=$((i + 1))
+done
+if [[ -n "$output_file" ]]; then
+  printf '# Snippet: External Test\n\n## Domain Context\nAn externally fetched snippet.\n\n## Rules\n- External rule 1\n- External rule 2\n\n## Common Pitfalls\n- External pitfall 1\n' > "$output_file"
+fi
+printf '200'
+exit 0
+MOCK
+  chmod +x "$mockbin/curl"
+}
+
+@test "github: snippet prefix is fetched and included in output" {
+  _setup_mock_curl "$TEST_DIR/mockbin"
+  cat > "$TEST_DIR/.ai-rules.yaml" << 'EOF'
+profile: ds-ml
+snippets:
+  - github:someone/my-rules/snippets/custom.md
+EOF
+  PATH="$TEST_DIR/mockbin:$PATH" run bash "$SYNC" --output-dir "$TEST_DIR"
+  [ "$status" -eq 0 ]
+  grep -q "External Test" "$TEST_DIR/CLAUDE.md"
+  grep -q "External rule 1" "$TEST_DIR/CLAUDE.md"
+}
+
+@test "https:// snippet URL is fetched and included in output" {
+  _setup_mock_curl "$TEST_DIR/mockbin"
+  cat > "$TEST_DIR/.ai-rules.yaml" << 'EOF'
+profile: ds-ml
+snippets:
+  - https://example.com/team-rules.md
+EOF
+  PATH="$TEST_DIR/mockbin:$PATH" run bash "$SYNC" --output-dir "$TEST_DIR"
+  [ "$status" -eq 0 ]
+  grep -q "External Test" "$TEST_DIR/CLAUDE.md"
+}
+
+@test "local and external snippets can be mixed" {
+  _setup_mock_curl "$TEST_DIR/mockbin"
+  cat > "$TEST_DIR/.ai-rules.yaml" << 'EOF'
+profile: ds-ml
+snippets:
+  - rag
+  - github:someone/my-rules/snippets/custom.md
+EOF
+  PATH="$TEST_DIR/mockbin:$PATH" run bash "$SYNC" --output-dir "$TEST_DIR"
+  [ "$status" -eq 0 ]
+  grep -qi "RAG\|retrieval" "$TEST_DIR/CLAUDE.md"
+  grep -q "External Test" "$TEST_DIR/CLAUDE.md"
+}
+
+@test "external snippet fetch failure (HTTP 404) exits with error" {
+  mkdir -p "$TEST_DIR/mockbin"
+  cat > "$TEST_DIR/mockbin/curl" << 'MOCK'
+#!/bin/bash
+output_file=""
+i=1
+while [[ $i -le $# ]]; do
+  if [[ "${!i}" == "-o" ]]; then
+    i=$((i + 1))
+    output_file="${!i}"
+  fi
+  i=$((i + 1))
+done
+[[ -n "$output_file" ]] && printf '404 Not Found' > "$output_file"
+printf '404'
+exit 0
+MOCK
+  chmod +x "$TEST_DIR/mockbin/curl"
+  cat > "$TEST_DIR/.ai-rules.yaml" << 'EOF'
+profile: ds-ml
+snippets:
+  - https://example.com/nonexistent.md
+EOF
+  PATH="$TEST_DIR/mockbin:$PATH" run bash "$SYNC" --output-dir "$TEST_DIR"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"Failed to fetch external snippet"* ]]
+}
+
+@test "missing curl gives a helpful error for external snippets" {
+  # RULES_CURL lets callers override the curl executable; point it at a nonexistent
+  # binary so that command -v fails and the helpful error message is shown.
+  cat > "$TEST_DIR/.ai-rules.yaml" << 'EOF'
+profile: ds-ml
+snippets:
+  - github:someone/my-rules/snippets/custom.md
+EOF
+  RULES_CURL="no-such-curl-binary" run bash "$SYNC" --output-dir "$TEST_DIR"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"curl is required"* ]]
+}
