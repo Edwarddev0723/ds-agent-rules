@@ -1,15 +1,47 @@
 # Quickstart
 
-## 1. Clone
+## 1. Install
 
-```bash
-git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
-cd ~/.ai-rules && chmod +x sync.sh new-project.sh
-```
+=== "npm (recommended)"
+
+    ```bash
+    # Zero-install via npx
+    npx ds-agent-rules init
+
+    # Or install globally
+    npm install -g ds-agent-rules
+    ```
+
+=== "pip"
+
+    ```bash
+    pip install ds-agent-rules
+    ds-agent-rules init
+    ```
+
+=== "git clone"
+
+    ```bash
+    git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
+    cd ~/.ai-rules && chmod +x sync.sh new-project.sh
+    ```
 
 ## 2. Pick your path
 
-### A) Interactive setup — guided walkthrough
+### A) npx / pip — zero-clone workflow
+
+```bash
+cd /path/to/your/project
+
+# Apply a preset
+npx ds-agent-rules preset llm-project    # npm
+ds-agent-rules preset llm-project        # pip
+
+# Or interactive setup
+npx ds-agent-rules new-project
+```
+
+### B) Interactive setup (git clone) — guided walkthrough
 
 ```bash
 cd /path/to/your/project
@@ -18,14 +50,14 @@ cd /path/to/your/project
 
 Creates `.ai-rules.yaml`, syncs rules, and scaffolds directories.
 
-### B) One-liner with preset — fastest for common setups
+### C) One-liner with preset — fastest for common setups
 
 ```bash
 cd /path/to/your/project
 ~/.ai-rules/sync.sh --preset llm-project
 ```
 
-### C) Config file — recommended for ongoing projects
+### D) Config file — recommended for ongoing projects
 
 ```bash
 cd /path/to/your/project
