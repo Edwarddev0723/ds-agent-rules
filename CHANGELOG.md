@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-02-27
+
+### Added
+- **GitHub Action** (`action.yml`): publish-ready composite action for GitHub Marketplace — auto-syncs rules on `.ai-rules.yaml` push and commits the generated files
+- **`examples/sync-ai-rules.yml`**: copy-paste workflow template for teams
+- **Remote Rules** (`docs/r/*.txt`): 16 presets compiled into plain-text URLs for zero-install use in Cursor, Windsurf, and other AI IDEs
+- `docs-build.sh` now generates `docs/r/{preset}.txt` and adds a Remote Rules section to the Presets docs page
+
+### Changed
+- README: added "Remote Rules" and "GitHub Action" sections before Quickstart
+
+---
+
 ## [1.2.0] — 2026-02-27
 
 ### Added

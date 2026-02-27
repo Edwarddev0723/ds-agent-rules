@@ -1,0 +1,41 @@
+# =============================================================================
+# ds-agent-rules: Auto-Sync Workflow
+#
+# Copy this file to  .github/workflows/sync-ai-rules.yml  in your project.
+#
+# What it does:
+#   Whenever .ai-rules.yaml is pushed to main, GitHub Actions will
+#   automatically run sync.sh and commit the updated AI config files
+#   (CLAUDE.md, .cursorrules, AGENTS.md, …) back to your repo.
+#
+# Required: a .ai-rules.yaml file in your project root.
+#   Create one with:  npx ds-agent-rules init
+#                or:  ds-agent-rules init       (pip)
+# =============================================================================
+
+name: Sync AI Agent Rules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.ai-rules.yaml'     # only trigger when the config changes
+  workflow_dispatch:          # allow manual re-sync from the Actions tab
+
+permissions:
+  contents: write             # required: allows the action to commit and push
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out your repo (credentials are set up automatically)
+      - uses: actions/checkout@v4
+
+      # 2. Run ds-agent-rules and commit the generated files
+      - uses: Edwarddev0723/ds-agent-rules@v1
+        # All inputs are optional — omit to auto-read .ai-rules.yaml
+        # with:
+        #   preset: llm-project          # override .ai-rules.yaml with a preset
+        #   rules-version: v1.3.0        # pin a specific version for reproducibility
+        #   commit-message: 'chore: update AI rules'

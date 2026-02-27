@@ -55,6 +55,95 @@ Without explicit rules, AI agents silently introduce bad habits:
 
 ---
 
+## Remote Rules (Zero-Install)
+
+> No `git clone`, no `pip install` — paste a URL and you're done.
+
+Each URL below returns a fully compiled rule file (`core.md` + overlay + snippets) for use in
+**Cursor**, **Windsurf**, or any AI IDE that supports loading rules from a remote URL.
+
+| Preset | Remote URL |
+|--------|-----------|
+| `llm-project` | `https://edwarddev0723.github.io/ds-agent-rules/r/llm-project.txt` |
+| `agentic-ai` | `https://edwarddev0723.github.io/ds-agent-rules/r/agentic-ai.txt` |
+| `cv-project` | `https://edwarddev0723.github.io/ds-agent-rules/r/cv-project.txt` |
+| `distributed-llm` | `https://edwarddev0723.github.io/ds-agent-rules/r/distributed-llm.txt` |
+| `data-platform` | `https://edwarddev0723.github.io/ds-agent-rules/r/data-platform.txt` |
+| `tabular-project` | `https://edwarddev0723.github.io/ds-agent-rules/r/tabular-project.txt` |
+| `ts-forecast` | `https://edwarddev0723.github.io/ds-agent-rules/r/ts-forecast.txt` |
+| `full-stack-ai` | `https://edwarddev0723.github.io/ds-agent-rules/r/full-stack-ai.txt` |
+
+> See [all 16 presets →](https://edwarddev0723.github.io/ds-agent-rules/presets/)
+
+**Cursor:** Settings → Rules for AI → Add Rule → paste URL
+
+**Windsurf / others:** fetch with `curl` and paste, or use your IDE's remote URL field
+
+```bash
+# Preview any preset locally
+curl https://edwarddev0723.github.io/ds-agent-rules/r/llm-project.txt
+```
+
+---
+
+## GitHub Action (Auto-Sync for Teams)
+
+> Forget manual `sync.sh` runs. Every push to `.ai-rules.yaml` triggers an automatic sync and commit.
+
+Add two files to your project and you're done:
+
+**`.ai-rules.yaml`** (your project config):
+
+```yaml
+profile: ds-ml
+snippets:
+  - llm-finetuning
+  - rag
+  - mlops
+```
+
+**`.github/workflows/sync-ai-rules.yml`** ([copy from examples/](examples/sync-ai-rules.yml)):
+
+```yaml
+name: Sync AI Agent Rules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.ai-rules.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Edwarddev0723/ds-agent-rules@v1
+```
+
+When anyone edits `.ai-rules.yaml` and pushes, GitHub Actions automatically re-generates and commits `CLAUDE.md`, `.cursorrules`, `AGENTS.md`, and all other AI tool config files. No one ever needs to remember to run `sync.sh`.
+
+**Optional inputs:**
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `preset` | _(reads `.ai-rules.yaml`)_ | Named preset; overrides config file |
+| `rules-version` | `main` | Branch, tag, or SHA of ds-agent-rules to use |
+| `commit-message` | `chore: sync AI agent rules` | Message on the auto-commit |
+
+```yaml
+      - uses: Edwarddev0723/ds-agent-rules@v1
+        with:
+          preset: llm-project       # override .ai-rules.yaml
+          rules-version: v1.3.0     # pin for reproducibility
+```
+
+---
+
 ## Quickstart
 
 ### 1. Install

@@ -1,0 +1,88 @@
+name: 'Sync AI Agent Rules'
+description: >
+  Auto-sync ds-agent-rules into CLAUDE.md, .cursorrules, AGENTS.md, and other
+  AI tool configs whenever .ai-rules.yaml changes. Publishes a commit with the
+  updated files — no manual sync.sh needed.
+author: 'Edwarddev0723'
+
+branding:
+  icon: 'refresh-cw'
+  color: 'blue'
+
+inputs:
+  preset:
+    description: >
+      Named preset to apply (e.g. llm-project, agentic-ai).
+      Overrides .ai-rules.yaml when set.
+      Run `./sync.sh --list` to see all available presets.
+    required: false
+    default: ''
+
+  rules-version:
+    description: >
+      ds-agent-rules branch, tag, or SHA to fetch.
+      Use a tag (e.g. v1.3.0) for reproducible builds.
+    required: false
+    default: 'main'
+
+  commit-message:
+    description: 'Commit message used when generated files are pushed.'
+    required: false
+    default: 'chore: sync AI agent rules'
+
+runs:
+  using: 'composite'
+  steps:
+    # ── 1. Fetch the rule definitions ────────────────────────────────────────
+    - name: Fetch ds-agent-rules
+      shell: bash
+      env:
+        RULES_VERSION: ${{ inputs.rules-version }}
+      run: |
+        git clone --depth 1 --branch "$RULES_VERSION" \
+          https://github.com/Edwarddev0723/ds-agent-rules \
+          "${{ runner.temp }}/ds-agent-rules"
+        chmod +x "${{ runner.temp }}/ds-agent-rules/sync.sh"
+
+    # ── 2. Run sync.sh against the caller's workspace ────────────────────────
+    - name: Sync rules
+      shell: bash
+      env:
+        RULES_DIR_OVERRIDE: ${{ runner.temp }}/ds-agent-rules
+        INPUT_PRESET: ${{ inputs.preset }}
+      run: |
+        args=(--output-dir "$GITHUB_WORKSPACE")
+        if [[ -n "$INPUT_PRESET" ]]; then
+          args+=(--preset "$INPUT_PRESET")
+        fi
+        "${{ runner.temp }}/ds-agent-rules/sync.sh" "${args[@]}"
+
+    # ── 3. Commit and push any changed files ─────────────────────────────────
+    - name: Commit generated files
+      shell: bash
+      env:
+        COMMIT_MSG: ${{ inputs.commit-message }}
+      run: |
+        cd "$GITHUB_WORKSPACE"
+
+        git config user.name  "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Stage only the files that sync.sh manages
+        git add \
+          CLAUDE.md \
+          AGENTS.md \
+          .cursorrules \
+          .windsurfrules \
+          ".github/copilot-instructions.md" \
+          ".gemini/styleguide.md" \
+          2>/dev/null || true
+
+        if git diff --staged --quiet; then
+          echo "✅ AI rules already up to date — nothing to commit."
+          exit 0
+        fi
+
+        git commit -m "$COMMIT_MSG"
+        git push
+        echo "✅ AI rules synced and committed."
