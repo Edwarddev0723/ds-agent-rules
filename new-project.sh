@@ -20,7 +20,7 @@ set -euo pipefail
 #   --yes / -y             Accept all defaults (non-interactive mode)
 # =============================================================================
 
-RULES_DIR="$(cd "$(dirname "$0")" && pwd)"
+RULES_DIR="${RULES_DIR_OVERRIDE:-$(cd "$(dirname "$0")" && pwd)}"
 
 # ─── Parse flags ──────────────────────────────────────────────────────────────
 ARG_PRESET=""

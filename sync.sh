@@ -18,7 +18,7 @@ set -euo pipefail
 #   ./sync.sh --diff                       # show changes before writing
 # =============================================================================
 
-RULES_DIR="$(cd "$(dirname "$0")" && pwd)"
+RULES_DIR="${RULES_DIR_OVERRIDE:-$(cd "$(dirname "$0")" && pwd)}"
 DRY_RUN=false
 OUTPUT_DIR="."
 PRESET=""

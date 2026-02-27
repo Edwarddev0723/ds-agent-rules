@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml/badge.svg)](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/ds-agent-rules)](https://www.npmjs.com/package/ds-agent-rules)
+[![PyPI version](https://img.shields.io/pypi/v/ds-agent-rules)](https://pypi.org/project/ds-agent-rules/)
 [![GitHub release](https://img.shields.io/github/v/release/Edwarddev0723/ds-agent-rules)](https://github.com/Edwarddev0723/ds-agent-rules/releases)
 [![GitHub stars](https://img.shields.io/github/stars/Edwarddev0723/ds-agent-rules?style=social)](https://github.com/Edwarddev0723/ds-agent-rules/stargazers)
 
@@ -55,9 +57,19 @@ Without explicit rules, AI agents silently introduce bad habits:
 
 ## Quickstart
 
-### 1. Clone
+### 1. Install
+
+Choose your preferred method:
 
 ```bash
+# npm (zero-install via npx)
+npx ds-agent-rules init
+
+# pip
+pip install ds-agent-rules
+ds-agent-rules init
+
+# git clone (full control)
 git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 cd ~/.ai-rules && chmod +x sync.sh new-project.sh
 ```
@@ -65,7 +77,20 @@ cd ~/.ai-rules && chmod +x sync.sh new-project.sh
 ### 2. Pick your path
 
 <details>
-<summary><b>A) Interactive setup</b> — guided walkthrough</summary>
+<summary><b>A) npx / pip</b> — zero-clone workflow</summary>
+
+```bash
+cd /path/to/your/project
+npx ds-agent-rules preset llm-project    # npm
+ds-agent-rules preset llm-project        # pip
+
+# or interactive
+npx ds-agent-rules new-project
+```
+</details>
+
+<details>
+<summary><b>B) Interactive setup</b> (git clone) — guided walkthrough</summary>
 
 ```bash
 cd /path/to/your/project
@@ -245,10 +270,18 @@ mkdir team-rules && vim team-rules/our-standards.md
 ## Installation & Git Strategy
 
 ```bash
-# Option 1: Standalone
+# Option 1: npm (recommended for JS/TS developers)
+npm install -g ds-agent-rules        # global install
+npx ds-agent-rules sync ds-ml rag    # or run directly via npx
+
+# Option 2: pip (recommended for Python developers)
+pip install ds-agent-rules
+ds-agent-rules sync ds-ml rag
+
+# Option 3: Standalone (git clone)
 git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 
-# Option 2: Git submodule in dotfiles
+# Option 4: Git submodule in dotfiles
 cd ~/.dotfiles && git submodule add https://github.com/Edwarddev0723/ds-agent-rules
 ```
 

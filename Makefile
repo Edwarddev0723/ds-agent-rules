@@ -1,4 +1,4 @@
-.PHONY: list test lint lint-snippets validate help
+.PHONY: list test lint lint-snippets validate help npm-publish pip-publish
 
 SHELL := /bin/bash
 
@@ -10,7 +10,7 @@ list: ## List all available overlays, snippets, and presets
 
 lint: ## Run ShellCheck on all shell scripts
 	@echo "🔍 Running ShellCheck..."
-	@shellcheck sync.sh new-project.sh docs-build.sh
+	@shellcheck sync.sh new-project.sh docs-build.sh pip-prepare.sh
 	@echo "✅ ShellCheck passed"
 
 lint-snippets: ## Validate snippet format (min lines, required sections)
@@ -47,6 +47,14 @@ init: ## Create .ai-rules.yaml in current directory
 	@./sync.sh --init
 
 ci: lint lint-snippets test ## Run full CI pipeline (lint + test)
+
+npm-publish: ## Publish to npm registry
+	npm publish --access public
+
+pip-publish: ## Build and publish to PyPI
+	bash pip-prepare.sh
+	python -m build
+	twine upload dist/*
 
 docs: ## Build docs site (requires mkdocs-material)
 	@bash docs-build.sh

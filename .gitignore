@@ -16,6 +16,11 @@ __pycache__/
 dist/
 build/
 .eggs/
+src/ds_agent_rules/data/
+
+# Node
+node_modules/
+package-lock.json
 
 # Test artifacts
 /tmp/
@@ -24,6 +29,13 @@ tests/tmp/
 
 # Generated during testing
 /test-output/
+
+# Generated rule output files (produced by sync.sh)
+CLAUDE.md
+AGENTS.md
+.cursorrules
+.windsurfrules
+.gemini/
 
 # MkDocs
 site/

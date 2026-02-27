@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-02-27
+
+### Added
+- **npm package**: `npx ds-agent-rules init` / `npm install -g ds-agent-rules` (package.json, bin/cli.js)
+- **pip package**: `pip install ds-agent-rules` / `ds-agent-rules sync` (pyproject.toml, src/ds_agent_rules/)
+- `pip-prepare.sh` helper to stage data files before `python -m build`
+- npm and PyPI version badges in README
+- Makefile `npm-publish` and `pip-publish` targets
+
+### Changed
+- `sync.sh` and `new-project.sh` support `RULES_DIR_OVERRIDE` env var for package-managed installs
+- README & README_zh-TW quickstart sections now show npm / pip / git clone options
+- Installation section expanded to 4 methods (npm, pip, standalone clone, git submodule)
+
 ## [1.1.0] — 2026-02-26
 
 ### Added

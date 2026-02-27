@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml/badge.svg)](https://github.com/Edwarddev0723/ds-agent-rules/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/ds-agent-rules)](https://www.npmjs.com/package/ds-agent-rules)
+[![PyPI version](https://img.shields.io/pypi/v/ds-agent-rules)](https://pypi.org/project/ds-agent-rules/)
 [![GitHub release](https://img.shields.io/github/v/release/Edwarddev0723/ds-agent-rules)](https://github.com/Edwarddev0723/ds-agent-rules/releases)
 [![GitHub stars](https://img.shields.io/github/stars/Edwarddev0723/ds-agent-rules?style=social)](https://github.com/Edwarddev0723/ds-agent-rules/stargazers)
 
@@ -55,9 +57,19 @@
 
 ## 快速開始
 
-### 1. 下載
+### 1. 安裝
+
+選擇你喜歡的方式：
 
 ```bash
+# npm（透過 npx 零安裝）
+npx ds-agent-rules init
+
+# pip
+pip install ds-agent-rules
+ds-agent-rules init
+
+# git clone（完整控制）
 git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 cd ~/.ai-rules && chmod +x sync.sh new-project.sh
 ```
@@ -65,7 +77,20 @@ cd ~/.ai-rules && chmod +x sync.sh new-project.sh
 ### 2. 選擇設定方式
 
 <details>
-<summary><b>A) 互動式設定</b> — 引導式問答</summary>
+<summary><b>A) npx / pip</b> — 免 clone 工作流</summary>
+
+```bash
+cd /path/to/your/project
+npx ds-agent-rules preset llm-project    # npm
+ds-agent-rules preset llm-project        # pip
+
+# 或使用互動式
+npx ds-agent-rules new-project
+```
+</details>
+
+<details>
+<summary><b>B) 互動式設定</b>（git clone）— 引導式問答</summary>
 
 ```bash
 cd /path/to/your/project
@@ -245,10 +270,18 @@ mkdir team-rules && vim team-rules/our-standards.md
 ## 安裝與 Git 策略
 
 ```bash
-# 方式一：獨立 clone
+# 方式一：npm（推薦 JS/TS 開發者）
+npm install -g ds-agent-rules
+npx ds-agent-rules sync ds-ml rag    # 或透過 npx 直接執行
+
+# 方式二：pip（推薦 Python 開發者）
+pip install ds-agent-rules
+ds-agent-rules sync ds-ml rag
+
+# 方式三：獨立 clone
 git clone https://github.com/Edwarddev0723/ds-agent-rules ~/.ai-rules
 
-# 方式二：作為 dotfiles 的 Git submodule
+# 方式四：作為 dotfiles 的 Git submodule
 cd ~/.dotfiles && git submodule add https://github.com/Edwarddev0723/ds-agent-rules
 ```
 
