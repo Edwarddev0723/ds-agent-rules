@@ -348,6 +348,18 @@ cd ~/.ai-rules && git add -A && git commit -m "rule: ..."
 
 ---
 
+## 支持這個專案 (Badge)
+
+如果你在專案中使用了 **ds-agent-rules** 來規範 AI 代理，歡迎在你的 `README.md` 加入這個徽章，讓大家知道你重視 AI 的程式碼品質！
+
+[![AI Rules: ds-agent-rules](https://img.shields.io/badge/AI%20Rules-ds--agent--rules-3F51B5?logo=robot&logoColor=white)](https://github.com/Edwarddev0723/ds-agent-rules)
+
+```markdown
+[![AI Rules: ds-agent-rules](https://img.shields.io/badge/AI%20Rules-ds--agent--rules-3F51B5?logo=robot&logoColor=white)](https://github.com/Edwarddev0723/ds-agent-rules)
+```
+
+---
+
 ## 授權條款
 
 [MIT](LICENSE)

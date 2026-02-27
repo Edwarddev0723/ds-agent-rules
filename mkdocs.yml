@@ -56,6 +56,11 @@ nav:
       - Installation: getting-started/installation.md
       - Quickstart: getting-started/quickstart.md
       - Configuration: getting-started/configuration.md
+  - Recipes:
+      - Overview: recipes/index.md
+      - Enterprise RAG: recipes/rag-chatbot.md
+      - AI Agent System: recipes/ai-agent-system.md
+      - Data Pipeline: recipes/data-pipeline.md
   - Base Overlays:
       - Core (always loaded): overlays/core.md
       - Data Science / ML: overlays/ds-ml.md

@@ -437,6 +437,18 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
 
+## Show Your Support
+
+If you are using **ds-agent-rules** to keep your AI agents in check, proudly display this badge in your project's `README.md`!
+
+[![AI Rules: ds-agent-rules](https://img.shields.io/badge/AI%20Rules-ds--agent--rules-3F51B5?logo=robot&logoColor=white)](https://github.com/Edwarddev0723/ds-agent-rules)
+
+```markdown
+[![AI Rules: ds-agent-rules](https://img.shields.io/badge/AI%20Rules-ds--agent--rules-3F51B5?logo=robot&logoColor=white)](https://github.com/Edwarddev0723/ds-agent-rules)
+```
+
+---
+
 ## Who Uses This
 
 Using **ds-agent-rules** in your project or team? We'd love to hear about it! Open an issue or PR to add your name here.
